@@ -4,25 +4,80 @@ import FullBackWrapper from 'components/FullBackWrapper'
 import checkboxChecked from 'resources/common/checkbox_checked.svg'
 import checkbox from 'resources/common/checkbox.svg'
 import background from 'resources/images/auth/login_background.jpg'
+import {emailReg} from 'components/regulation'
+import FormError from "components/FormError";
+import { useForm } from "react-hook-form";
 const Login = () =>{
+  
+  const { register, handleSubmit, formState, getValues, setError,clearErrors } = useForm({
+    mode: "onChange",
+  });
+
+  const onSubmitValid = async(data) => {
+    let {email, password} = data
+    console.log(email,password)
+    // let inquiry = textAreaValue.current.value;
+    
+    // setLoading(true)
+    // const result = await ContactApi.store(name, company, email, phone, inquiry, policy?1:2)
+    // setLoading(false)
+
+    // if(result.data.success){
+    //   const andrewPhone = await siteSignApi.contactSMS(name,email,phone)
+    //   swal({title: "접수가 완료되었습니다.",text: "",icon: "success",dangerMode: true,}).then( async(answer) => {location.href='/'})
+    // }else{
+    //   swal({title: "문제가 발생하였습니다.",text: "새로고침 후 다시 시도하시거나 관리자에게 문의해주세요.",icon: "warning",dangerMode: true,})
+    // }
+    // if (loading) {
+    //   return;
+    // }
+    // createAccount({
+    //   variables: {
+    //     ...data,
+    //   },
+    // });
+  };
+
+  const clearLoginError = () => {
+    clearErrors("result");
+  };
+
   return(
     <FullBackWrapper background={background}>
       <WhiteBox>
         <div className="title">BRIPHY</div>
         <div className="sub-title">로그인</div>
-
-        <InputWrapper>
-          <input type="text" id="email" name="email" placeholder="Email" />
-        </InputWrapper>
-        <InputWrapper>
-          <input type="password" id="password" name="password" placeholder="Password"/>
-        </InputWrapper>
-        <PolicyField>
-          <label htmlFor="policy">
-            <Check id="policy" name="policy" /><i className="check-icon"></i><span>기억하기</span>
-          </label>
-        </PolicyField>
-        <SubmitButton type="submit" value={"로그인하기"} />
+        <form onSubmit={handleSubmit(onSubmitValid)}>
+          <InputWrapper hasError={Boolean(formState.errors?.email?.message)}>
+            <input 
+              {...register('email',{
+                required:"이메일을 입력하세요.",
+                pattern:
+                {
+                  value: emailReg,
+                  message: "형식에 맞는 이메일을 입력해주세요."
+                } 
+              })}
+              onFocus={clearLoginError}
+              type="text" id="email" name="email" placeholder="Email" />
+          </InputWrapper >
+          <FormError message = {formState.errors?.email?.message}  />
+          <InputWrapper hasError={Boolean(formState.errors?.password?.message)}>
+            <input 
+              {...register('password',{
+                required:"비밀번호를 입력하세요."
+              })}
+              onFocus={clearLoginError}
+              type="password" id="password" name="password" placeholder="Password"/>
+          </InputWrapper>
+          <FormError message = {formState.errors?.password?.message}  />
+          <PolicyField>
+            <label htmlFor="policy">
+              <Check id="policy" name="policy" /><i className="check-icon"></i><span>기억하기</span>
+            </label>
+          </PolicyField>
+          <SubmitButton type="submit" value={"로그인하기"} />
+        </form>
       </WhiteBox>
     </FullBackWrapper>
   )
@@ -32,7 +87,8 @@ const WhiteBox = styled.div`
   padding: 2rem;
   border-radius:1rem;
   color:white;
-  transform:translate3d(-150%,0,0);
+  width:400px;
+  transform:translate3d(-100%,0,0);
   .title{
     font-size:4rem;
     font-weight:600;
@@ -52,11 +108,11 @@ const InputWrapper = styled.div`
     outline:none;
     border:none;
     background:transparent;
-    border-bottom: 1px solid white;
+    border-bottom: ${props=>props.hasError?'1px solid tomato':'1px solid white'};
     width:100%;
     color:white;
     &::placeholder{
-      color:#ffffff94;
+      color:${props=>props.hasError?'tomato':'#ffffff94'};
     }
   }
 `;
